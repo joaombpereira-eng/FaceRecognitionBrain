@@ -1,10 +1,17 @@
 import "./App.css";
+import React, { Component } from "react";
 import Particles from "react-tsparticles";
 import { loadFull } from "tsparticles";
+import Clarifai from "clarifai";
 import Navigation from "./components/Navigation/Navigation";
 import Logo from "./components/Logo/Logo";
 import Rank from "./components/Rank/Rank";
 import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
+import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
+
+const app = new Clarifai.App({
+  apiKey: "656398a1304c481c9411f48688d09f70",
+});
 
 const paramsOptions = {
   fpsLimit: 120,
@@ -51,7 +58,7 @@ const paramsOptions = {
         default: "bounce",
       },
       random: false,
-      speed: 6,
+      speed: 4,
       straight: false,
     },
     number: {
@@ -74,34 +81,65 @@ const paramsOptions = {
   detectRetina: true,
 };
 
-function App() {
-  const particlesInit = async (main) => {
-    console.log(main);
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      input: "",
+      imageUrl: "",
+    };
+  }
 
-    // you can initialize the tsParticles instance (main) here, adding custom shapes or presets
-    // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
-    // starting from v2 you can add only the features you need reducing the bundle size
-    await loadFull(main);
+  onInputChange = (event) => {
+    this.setState({ input: event.target.value });
   };
 
-  const particlesLoaded = (container) => {
-    console.log(container);
+  onButtonSubmit = () => {
+    this.setState({ imageUrl: this.state.input });
+    app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input).then(
+      function(response) {
+        console.log(
+          response.outputs[0].data.regions[0].region_info.bounding_box
+        );
+      },
+      function(err) {
+        // there was an error
+      }
+    );
   };
-  return (
-    <div className="App">
-      <Particles
-        id="tsparticles"
-        init={particlesInit}
-        loaded={particlesLoaded}
-        options={paramsOptions}
-      />
-      <Navigation />
-      <Logo />
-      <Rank />
-      <ImageLinkForm />
-      {/* <FaceRecognition /> */}
-    </div>
-  );
+
+  render() {
+    const particlesInit = async (main) => {
+      console.log(main);
+
+      // you can initialize the tsParticles instance (main) here, adding custom shapes or presets
+      // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
+      // starting from v2 you can add only the features you need reducing the bundle size
+      await loadFull(main);
+    };
+
+    const particlesLoaded = (container) => {
+      console.log(container);
+    };
+    return (
+      <div className="App">
+        <Particles
+          id="tsparticles"
+          init={particlesInit}
+          loaded={particlesLoaded}
+          options={paramsOptions}
+        />
+        <Navigation />
+        <Logo />
+        <Rank />
+        <ImageLinkForm
+          onInputChange={this.onInputChange}
+          onButtonSubmit={this.onButtonSubmit}
+        />
+        <FaceRecognition imageUrl={this.state.imageUrl} />
+      </div>
+    );
+  }
 }
 
 export default App;
