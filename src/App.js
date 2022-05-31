@@ -8,6 +8,7 @@ import Logo from "./components/Logo/Logo";
 import Rank from "./components/Rank/Rank";
 import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
+import SignIn from "./components/SignIn/SignIn";
 
 const app = new Clarifai.App({
   apiKey: "656398a1304c481c9411f48688d09f70",
@@ -17,14 +18,6 @@ const paramsOptions = {
   fpsLimit: 120,
   interactivity: {
     events: {
-      onClick: {
-        enable: true,
-        mode: "push",
-      },
-      onHover: {
-        enable: true,
-        mode: "repulse",
-      },
       resize: true,
     },
     modes: {
@@ -149,6 +142,7 @@ class App extends Component {
           options={paramsOptions}
         />
         <Navigation />
+        <SignIn />
         <Logo />
         <Rank />
         <ImageLinkForm
