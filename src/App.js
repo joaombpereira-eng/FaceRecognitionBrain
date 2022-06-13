@@ -128,11 +128,26 @@ class App extends Component {
     this.setState({ input: event.target.value });
   };
 
-  onButtonSubmit = () => {
+  onPictureSubmit = () => {
     this.setState({ imageUrl: this.state.input });
     app.models
       .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
       .then((response) => {
+        if (response) {
+          fetch("http://localhost:3000/image", {
+            method: "put",
+            headers: {
+              "Content-type": "application/json",
+            },
+            body: JSON.stringify({
+              id: this.state.user.id,
+            }),
+          })
+            .then((response) => response.json())
+            .then((count) => {
+              this.setState(Object.assign(this.state.user, { entries: count }));
+            });
+        }
         this.displayFaceBox(this.calculateFaceLocation(response));
       })
       .catch((err) => console.log(err));
@@ -148,7 +163,7 @@ class App extends Component {
   };
 
   render() {
-    const { isSignedIn, imageUrl, route, box } = this.state;
+    const { isSignedIn, imageUrl, route, box, user } = this.state;
     const particlesInit = async (main) => {
       // you can initialize the tsParticles instance (main) here, adding custom shapes or presets
       // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
@@ -169,15 +184,15 @@ class App extends Component {
         {route === "home" ? (
           <div>
             <Logo />
-            <Rank />
+            <Rank name={user.name} entries={user.entries} />
             <ImageLinkForm
               onInputChange={this.onInputChange}
-              onButtonSubmit={this.onButtonSubmit}
+              onButtonSubmit={this.onPictureSubmit}
             />
             <FaceRecognition box={box} imageUrl={imageUrl} />
           </div>
         ) : route === "signin" ? (
-          <SignIn onRouteChange={this.onRouteChange} />
+          <SignIn onRouteChange={this.onRouteChange} loadUser={this.loadUser} />
         ) : (
           <Register
             loadUser={this.loadUser}
