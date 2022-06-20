@@ -31,7 +31,7 @@ class SignIn extends React.Component {
       .then((response) => response.json())
       .then((user) => {
         if (user.id) {
-          // Does the user exists? Did we receive a user with a property of id?
+          // Does the user exists? Did we receive a user with a id?
           this.props.loadUser(user);
           this.props.onRouteChange("home");
         }
